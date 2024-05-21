@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: transliteration_bot
+    restart: always
+    networks:
+      - frontend
+      - backend
+    environment:
+      - TZ=${TZ}
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - IPV6_ENABLED=${IPV6_ENABLED}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - MESSAGE_LIMIT=${MESSAGE_LIMIT}
+    volumes:
+      - ./:/app
+
+networks:
+  backend:
+    internal: true
+
+  frontend:
+    external: false

@@ -1,4 +1,5 @@
 from transliterate import ChechenTransliterator
+from colorama import Fore, Style, init
 
 # Create an instance of the transliterator
 transliterator = ChechenTransliterator()
@@ -13,4 +14,4 @@ while True:
     else:
         # Transliterate the input
         transliterated_word = transliterator.apply_transliteration(word.strip())
-        print(f"Transliterated word: {transliterated_word}")
+        print(f"Transliterated word: {Fore.GREEN}{transliterated_word}{Style.RESET_ALL}")

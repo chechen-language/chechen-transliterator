@@ -32,7 +32,7 @@ def contains_cyrillic(text):
 
 @app.on_message(filters.command("start") & filters.private)
 async def start(client, message: Message):
-    await message.reply("Marşa doġiyla! Please send a word in Cyrillic script to transliterate")
+    await message.reply("Marşa doġiyla! Please send text in Cyrillic script to transliterate")
 
 @app.on_message(filters.private)
 async def transliterate_message(client, message: Message):
@@ -49,20 +49,17 @@ async def transliterate_message(client, message: Message):
         else:
             user_message_counts[user_id].append(current_time)
 
-    word = message.text.strip()
+    text = message.text
 
-    if not contains_cyrillic(word):
-        await message.reply("Please enter a valid word in Cyrillic script")
+    if not contains_cyrillic(text):
+        await message.reply("Please enter valid text in Cyrillic script")
         return
 
-    if ' ' in word:
-        await message.reply("Beta test yu: cẋa doş beŋ ma yaz de")
+    transliterated_text = ' '.join(transliterator.apply_transliteration(word) for word in text.split())
+    if transliterated_text:
+        await message.reply(transliterated_text)
     else:
-        transliterated_word = transliterator.apply_transliteration(word)
-        if transliterated_word.strip():
-            await message.reply(transliterated_word)
-        else:
-            await message.reply("The transliteration resulted in an empty string. Please check your input")
+        await message.reply("The transliteration resulted in an empty string. Please check your input")
 
 if __name__ == "__main__":
     app.run()

@@ -48,6 +48,8 @@ class ChechenTransliterator:
         return result
 
     def apply_transliteration(self, text):
+        text = re.sub(r'\bа\b', 'ə', text) # Replace 'а' with 'ə' if it is a separate word
+        
         words = text.split()
         transliterated_words = [self.transliterate_word(word) for word in words]
         return ' '.join(transliterated_words)

@@ -9,47 +9,47 @@ class ChechenTransliterator:
             self.transliteration = data['cyrl_latn']
 
     def transliterate_word(self, word):
-        # word = word.lower()
         result = ''
         i = 0
         while i < len(word):
             match = None
+            # Check all case variations
             for key in [
                 word[i:i + 3], # Try to match 3 character
                 word[i:i + 2], # Try to match 2 character
                 word[i:i + 1], # Try to match 1 character
             ]:
-                if key in self.transliteration:
-                    if key == 'ъ' and i + 1 < len(word) and word[i + 1] in 'еёюя': # if 'ъ' before 'е', 'ё', 'ю', 'я'
-                        if i > 0 and word[i - 1] == 'к': # and after 'к'
-                            match = 'q̇' # match to 'къ'
-                        else:
-                            match = '' # else skip 'ъ'
-                    elif key == 'е': # 'е' can be 'ye' or 'e' depending on the context
-                        if i == 0:
-                            match = 'ye' # if 'е' at the start of the word
-                        elif i > 0:
-                            if word[i - 1] == 'ъ' and (i < 2 or word[i - 2:i] != 'къ'):
-                                match = 'ye' # 'е' following 'ъ' that does not follow 'къ'
-                            else:
-                                match = self.transliteration[key]  # Regular transliteration for 'е'
-                        else:
-                            match = self.transliteration[key]
-                    elif key == 'н' and i == len(word) - 1:
-                        match = 'ŋ'  # 'н' at the end of the word
+                # Handle 'ъ' and 'Ъ' before 'е', 'ё', 'ю', 'я' and their uppercase versions
+                if key.lower() == 'ъ' and i + 1 < len(word) and word[i + 1].lower() in 'еёюя':
+                    if i > 0 and word[i - 1].lower() == 'к': # and after 'к'
+                        match = 'q̇' if key.islower() else 'Q̇' # match to 'къ'
                     else:
-                        match = self.transliteration[key]
-                    if match is not None:
-                        result += match
-                        i += len(key)
-                        break
+                        match = '' # else skip 'ъ'
+                elif key.lower() == 'е': # 'е' can be 'ye' or 'e' depending on the context
+                    if i == 0: # if 'е' at the start of the word
+                        match = 'ye' if key.islower() else 'Ye'
+                    elif i > 0 and word[i - 1].lower() == 'ъ' and (i < 2 or word[i - 2:i].lower() != 'къ'): # and after 'ъ' but not after 'къ'
+                        match = 'ye' if key.islower() else 'Ye'
+                    else:
+                        match = self.transliteration[key] # Regular transliteration for 'е'
+                elif key.lower() == 'н' and i == len(word) - 1: # 'н' at the end of the word
+                    match = 'ŋ' if key.islower() else 'Ŋ'
+                else:
+                    match = self.transliteration.get(key, None)
+
+                if match is not None:
+                    result += match
+                    i += len(key)
+                    break
+
             if match is None:
-                result += word[i]  # Add the character as is if no match was found
-                i += 1  # Move to next character
+                result += word[i]
+                i += 1
         return result
 
     def apply_transliteration(self, text):
         text = re.sub(r'\bа\b', 'ə', text) # Replace 'а' with 'ə' if it is a separate word
+        text = re.sub(r'\bА\b', 'Ə', text) # Replace 'А' with 'Ə' if it is a separate word
         
         words = text.split()
         transliterated_words = [self.transliterate_word(word) for word in words]

@@ -5,6 +5,7 @@ from transliterate import ChechenTransliterator
 from collections import defaultdict
 from datetime import datetime, timedelta
 import re
+import html
 
 API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
@@ -49,15 +50,56 @@ async def transliterate_message(client, message: Message):
         else:
             user_message_counts[user_id].append(current_time)
 
-    text = message.text
+    text = message.text.strip()
 
     if not contains_cyrillic(text):
         await message.reply("Please enter valid text in Cyrillic script")
         return
 
-    transliterated_text = ' '.join(transliterator.apply_transliteration(word) for word in text.split())
+    transliterated_text = transliterator.apply_transliteration(text)
+
+    # Text incorrectly rendered in messages longer than 200 characters containing combining diacritical marks on Android Telegram.
+    # To work around this issue, we send the transliterated text as a HTML document if the length exceeds 199 characters.
     if transliterated_text:
-        await message.reply(transliterated_text)
+        if len(transliterated_text) > 199:
+            # Create HTML content
+            html_content = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transliteration Result</title>
+    <style>
+        body {{
+            font-family: "Times New Roman", Times, serif;
+            font-size: 18px;
+            line-height: 1.4;
+        }}
+    </style>
+</head>
+<body>
+    <p>{html.escape(transliterated_text)}</p>
+</body>
+</html>
+            """
+            
+            # Get current date and time
+            current_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+            file_path = f"transliteration_result_{current_time}.html"
+            
+            # Write HTML content to a file
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            # Send the HTML file as a document
+            await message.reply_document(file_path)
+            
+            # Clean up the file after sending
+            os.remove(file_path)
+        else:
+            # Send as plain text if the length is less than 200 characters
+            await message.reply(transliterated_text)
     else:
         await message.reply("The transliteration resulted in an empty string. Please check your input")
 

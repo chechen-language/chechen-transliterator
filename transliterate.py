@@ -1,5 +1,6 @@
 import json
 import re
+import unicodedata
 
 class ChechenTransliterator:
     def __init__(self, filename='cyrl_latn_dictionary.json'):
@@ -52,4 +53,8 @@ class ChechenTransliterator:
         
         words = text.split()
         transliterated_words = [self.transliterate_word(word) for word in words]
-        return ' '.join(transliterated_words)
+        transliterated_text = ' '.join(transliterated_words)
+
+        # Normalize the result to NFC form to handle composed characters properly
+        normalized_text = unicodedata.normalize('NFC', transliterated_text)
+        return normalized_text

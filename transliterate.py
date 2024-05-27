@@ -34,11 +34,11 @@ class ChechenTransliterator:
                         match = '' # else skip 'ъ'
                 elif key.lower() == 'е': # 'е' can be 'ye' or 'e' depending on the context
                     if i == 0: # if 'е' at the start of the word
-                        # match to 'ye' if the next letter is uppercase or there is no next letter
-                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter else 'Ye')
+                        # match to 'ye' if the next letter is uppercase or if there is no next letter but previous letter is uppercase
+                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter and has_pre_letter and pre_letter.isupper() else 'Ye')
                     elif has_pre_letter and pre_letter.lower() == 'ъ' and (i < 2 or word[i - 2:i].lower() != 'къ'): # and after 'ъ' but not after 'къ'
-                        # match to 'ye' if the next letter is uppercase or there is no next letter
-                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter else 'Ye')
+                        # match to 'ye' if the next letter is uppercase or if there is no next letter but previous letter is uppercase
+                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter and has_pre_letter and pre_letter.isupper() else 'Ye')
                     else:
                         match = self.transliteration[key] # Regular transliteration for 'е'
                 elif key.lower() == 'н' and i == len(word) - 1: # 'н' at the end of the word

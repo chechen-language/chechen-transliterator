@@ -13,6 +13,12 @@ class ChechenTransliterator:
         i = 0
         while i < len(word):
             match = None
+            
+            has_next_letter = i + 1 < len(word)
+            next_letter = word[i + 1] if has_next_letter else None
+            has_pre_letter = i > 0
+            pre_letter = word[i - 1] if has_pre_letter else None
+
             # Check all case variations
             for key in [
                 word[i:i + 3], # Try to match 3 character
@@ -20,16 +26,19 @@ class ChechenTransliterator:
                 word[i:i + 1], # Try to match 1 character
             ]:
                 # Handle 'ъ' and 'Ъ' before 'е', 'ё', 'ю', 'я' and their uppercase versions
-                if key.lower() == 'ъ' and i + 1 < len(word) and word[i + 1].lower() in 'еёюя':
-                    if i > 0 and word[i - 1].lower() == 'к': # and after 'к'
+                # The lower() method is used to ensure the comparison is case-insensitive.
+                if key.lower() == 'ъ' and has_next_letter and next_letter.lower() in 'еёюя':
+                    if has_pre_letter and pre_letter.lower() == 'к': # and after 'к'
                         match = 'q̇' if key.islower() else 'Q̇' # match to 'къ'
                     else:
                         match = '' # else skip 'ъ'
                 elif key.lower() == 'е': # 'е' can be 'ye' or 'e' depending on the context
                     if i == 0: # if 'е' at the start of the word
-                        match = 'ye' if key.islower() else 'Ye'
-                    elif i > 0 and word[i - 1].lower() == 'ъ' and (i < 2 or word[i - 2:i].lower() != 'къ'): # and after 'ъ' but not after 'къ'
-                        match = 'ye' if key.islower() else 'Ye'
+                        # match to 'ye' if the next letter is uppercase or there is no next letter
+                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter else 'Ye')
+                    elif has_pre_letter and pre_letter.lower() == 'ъ' and (i < 2 or word[i - 2:i].lower() != 'къ'): # and after 'ъ' but not after 'къ'
+                        # match to 'ye' if the next letter is uppercase or there is no next letter
+                        match = 'ye' if key.islower() else ('YE' if has_next_letter and next_letter.isupper() or not has_next_letter else 'Ye')
                     else:
                         match = self.transliteration[key] # Regular transliteration for 'е'
                 elif key.lower() == 'н' and i == len(word) - 1: # 'н' at the end of the word

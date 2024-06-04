@@ -7,7 +7,9 @@ class ChechenTransliterator:
         with open(filename, 'r', encoding='utf-8') as file:
             data = json.load(file)
             self.transliteration = data['cyrl_latn']
-
+            self.blacklist = data['blacklist']
+            self.unsurelist = data['unsurelist']
+    
     def transliterate_word(self, word):
         result = ''
         i = 0
@@ -42,7 +44,12 @@ class ChechenTransliterator:
                     else:
                         match = self.transliteration[key] # Regular transliteration for 'е'
                 elif key.lower() == 'н' and i == len(word) - 1: # 'н' at the end of the word
-                    match = 'ŋ' if key.islower() else 'Ŋ'
+                    if word.lower() in self.blacklist:
+                        match = self.transliteration[key]
+                    elif word.lower() in self.unsurelist:
+                        match = 'ŋ[REPLACE]' if key.islower() else 'Ŋ[REPLACE]'
+                    else:
+                        match = 'ŋ' if key.islower() else 'Ŋ'
                 else:
                     match = self.transliteration.get(key, None)
 

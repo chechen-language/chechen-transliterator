@@ -1,4 +1,6 @@
 {
+  "version": "0.1.4",
+  "title": "Dictionary for Chechen language transliteration from Cyrillic to Latin script using alphabet from 1992",
   "cyrl_latn": {
     "а": "a", "А": "A",
     "аь": "ä", "Аь": "Ä", "аЬ": "ä", "АЬ": "Ä",
@@ -55,5 +57,7 @@
     "ххӏ": "hh", "Ххӏ": "Hh", "хХӏ": "hH", "ХХӏ": "HH", "ХХӀ": "HH", "хХӀ": "hH", "ХхӀ": "Hh", "ххӀ": "hh",
     "юь": "yü", "Юь": "Yü", "юЬ": "yü", "ЮЬ": "Yü",
     "яь": "yä", "Яь": "Yä", "яЬ": "yä", "ЯЬ": "Yä"
-  }
+  },
+  "blacklist": ["хан", "дин", "гӏан"],
+  "unsurelist": ["шун", "бен"]
 }
